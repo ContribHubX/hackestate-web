@@ -25,17 +25,19 @@ export function FormInput({ control, name, label, type = "text", placeholder, re
       render={({ field }) => (
         <FormItem>
           <div className="grid gap-2">
-            <Label htmlFor={name}>{label}</Label>
             <FormControl>
               {type === "password" ? (
                 <PasswordInput id={name} placeholder={placeholder} required={required} {...field} />
               ) : (
-                <Input 
-                id={name} 
-                type={type} 
-                placeholder={placeholder} 
-                required={required} 
-                {...field} /> 
+                <>
+                  <Label htmlFor={name}>{label}</Label>
+                  <Input 
+                  id={name} 
+                  type={type} 
+                  placeholder={placeholder} 
+                  required={required} 
+                  {...field} /> 
+                </>
               )}
             </FormControl>
             <FormMessage />
