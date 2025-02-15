@@ -42,9 +42,9 @@ const onSubmit = (value: RegisterSchema) => {
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Welcome back</CardTitle>
+          <CardTitle className="text-xl">Let's Get you Started!</CardTitle>
           <CardDescription>
-            Login with your Apple or Google account
+            Enter your personal Information
           </CardDescription>
         </CardHeader>
         <CardContent>
