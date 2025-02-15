@@ -1,9 +1,15 @@
-
+import { ModeToggle } from "@/components/ui/mode-toggle";
 
 const Home = () => {
+
   return (
-    <div>Home Page</div>
+    <div className="">
+      <ModeToggle/>
+      <p>Home Page lorem200</p>
+    </div>
   )
 }
+
+
 
 export default Home

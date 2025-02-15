@@ -6,8 +6,13 @@ export const queryConfig = {
       retry: false,
       staleTime: 1000 * 60,
     },
-  } satisfies DefaultOptions;
-  
+} satisfies DefaultOptions;
+   
+
 export const queryClient = new QueryClient({
     defaultOptions: queryConfig,
 });
+
+
+
+
