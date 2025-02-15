@@ -1,0 +1,114 @@
+import { NodePgDatabase } from "drizzle-orm/node-postgres";
+import Container, { Inject, Service } from "typedi";
+import * as schema from "@/database/schema";
+import { User } from "@/database/schema";
+import { LoginSchema, LoginResponse, RegisterSchema, ForgotPasswordSchema, ChangePasswordSchema } from "./auth.contracts";
+import { eq } from "drizzle-orm";
+import { AppError } from "@/common/app-error";
+import bcrypt from "bcrypt";
+import { providePasswordResetToken, provideToken, verifyPasswordResetToken } from "@/common/utils/jwt-util";
+import { HttpContextService } from "@/common/http-context";
+import { sendEmail } from "@/common/utils/email-util";
+
+@Service()
+class AuthService {
+    @Inject(() => HttpContextService)
+    private readonly httpContext!: HttpContextService;
+    
+    private readonly db!: NodePgDatabase<typeof schema>
+
+    constructor() {
+        this.db = Container.get("database");
+    }
+
+    async GetUsers() : Promise<User[]>{
+        const users = await this.db.query.user.findMany({});
+        return users;
+    }
+
+    async CreateUser(registerRequest: RegisterSchema) {
+        await this.db.insert(schema.user).values({...registerRequest});
+    }
+
+    async Register(registerRequest: RegisterSchema) {
+        const existingUser = await this.db.query.user.findFirst({
+            where: eq(schema.user.email, registerRequest.email)
+        });
+
+        if (existingUser){
+            throw AppError.badRequest("User already exist");
+        }
+
+        const hashedPassword = await bcrypt.hash(registerRequest.password, 10);
+
+        await this.CreateUser({
+            ...registerRequest,
+            password: hashedPassword
+        });
+    
+    }
+
+    async Login(loginRequest: LoginSchema) : Promise<LoginResponse> {
+        const existingUser = await this.db.query.user.findFirst({
+            where: eq(schema.user.email, loginRequest.email)
+        });
+
+
+        if(!existingUser){
+            throw AppError.notFound("User doesn't exist");
+        }
+
+        const isMatch = await bcrypt.compare(loginRequest.password, existingUser.password);
+
+        if(!isMatch){
+            throw AppError.forbidden("Invalid Credentials");
+        }
+        
+        const token = provideToken(existingUser);
+
+        return {
+            user: existingUser,
+            token
+        }
+    }
+
+    async ForgotPassword(forgotPasswordRequest: ForgotPasswordSchema){
+        try{
+            const userId = this.httpContext.getRequest().currentUser?.id;
+            const passwordResetToken = providePasswordResetToken(userId!);
+            await sendEmail(forgotPasswordRequest.email, "Test Email", "Hello from hackathon! " + passwordResetToken);
+        } catch(error){
+            throw AppError.badRequest("failed to send email");
+        }
+        
+    }
+
+    async ChangePassword(changePasswordRequest: ChangePasswordSchema){
+        const userId = verifyPasswordResetToken(changePasswordRequest.passwordResetToken);
+
+        if(!userId){
+            throw AppError.forbidden("Invalid or expired reset token");
+        }
+
+        const hashedPassword = await bcrypt.hash(changePasswordRequest.newPassword, 10);
+        
+        const updatedUser = await this.db.update(schema.user)
+            .set({password: hashedPassword})
+            .where(eq(schema.user.id, userId))
+            .returning({
+                id: schema.user.id
+            });
+        
+        if(!updatedUser.length){
+            throw AppError.notFound("User not found or password update failed");
+        }
+
+        return { message: "Password changed successfully" };
+    }
+
+    async GetUser() : Promise<User | undefined>{
+        return this.httpContext.getRequest().currentUser;
+    }
+}
+
+export default AuthService;
