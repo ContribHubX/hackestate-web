@@ -5,6 +5,7 @@ import { changePasswordSchema, forgotPasswordSchema, loginSchema, registerSchema
 import { validateData } from "@/common/middleware/validate-request";
 import { verifyAuth } from "@/common/middleware/verify-auth";
 import { AuthServiceExternal, SocialAuthProvider } from "./auth.service.external";
+import { uploadProfile } from "@/common/cloudinary";
 
 export const authRouter: Router = Router();
 
@@ -122,6 +123,17 @@ authRouter.get(
 })
 
 
+
+authRouter.post(
+    "/auth/upload",
+    uploadProfile.single("attachment"),
+    async (req: Request, res: Response) => {
+        const url = req.file!.path;
+
+        console.log("cloudinary link: " + url);
+        res.status(200).json({ url });
+    }
+)
 
 
 

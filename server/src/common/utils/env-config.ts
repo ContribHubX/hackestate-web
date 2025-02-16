@@ -32,6 +32,13 @@ export const emailConfig: EmailConfig = {
     rejectUnauthorized: process.env.EMAIL_REJECT_UNAUTHORIZED === "true",
 };
 
+export const cloudinaryConfig: CloudinaryConfig = {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME as string,
+    apiKey: process.env.CLOUDINARY_API_KEY as string,
+    secret: process.env.CLOUDINARY_API_SECRET as string,
+}
+
+
 export type EnvConfig = {
     port: string;
     databaseUrl: string;
@@ -58,4 +65,10 @@ export type EmailConfig = {
     password: string, 
     secure: boolean,
     rejectUnauthorized: boolean
+}
+
+export type CloudinaryConfig = {
+    cloudName: string,
+    apiKey: string,
+    secret: string,
 }
