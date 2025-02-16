@@ -10,6 +10,15 @@ export const env: EnvConfig = {
     resetTokenSecret: process.env.RESET_TOKEN_SECRET as string,
 };
 
+export const emailConfig: EmailConfig = {
+    host: process.env.EMAIL_HOST || "localhost",
+    port: Number(process.env.EMAIL_PORT) || 25,
+    username: process.env.EMAIL_USER || "",
+    password: process.env.EMAIL_PASSWORD || "",
+    secure: process.env.EMAIL_SECURE === "true",
+    rejectUnauthorized: process.env.EMAIL_REJECT_UNAUTHORIZED === "true",
+};
+
 export type EnvConfig = {
     port: string;
     databaseUrl: string;
@@ -17,3 +26,12 @@ export type EnvConfig = {
     jwtExpiration: string;
     resetTokenSecret: string;
 };
+
+export type EmailConfig = {
+    host: string,
+    port: number,
+    username: string,
+    password: string, 
+    secure: boolean,
+    rejectUnauthorized: boolean
+}

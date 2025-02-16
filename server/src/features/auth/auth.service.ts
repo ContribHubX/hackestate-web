@@ -8,14 +8,19 @@ import { AppError } from "@/common/app-error";
 import bcrypt from "bcrypt";
 import { providePasswordResetToken, provideToken, verifyPasswordResetToken } from "@/common/utils/jwt-util";
 import { HttpContextService } from "@/common/http-context";
-import { sendEmail } from "@/common/utils/email-util";
+import EmailService from "@/common/utils/email-service";
 
 @Service()
 class AuthService {
     @Inject(() => HttpContextService)
     private readonly httpContext!: HttpContextService;
     
+    @Inject(() => EmailService)
+    private readonly emailService!: EmailService;
+    
     private readonly db!: NodePgDatabase<typeof schema>
+
+    
 
     constructor() {
         this.db = Container.get("database");
@@ -76,9 +81,10 @@ class AuthService {
         try{
             const userId = this.httpContext.getRequest().currentUser?.id;
             const passwordResetToken = providePasswordResetToken(userId!);
-            await sendEmail(forgotPasswordRequest.email, "Test Email", "Hello from hackathon! " + passwordResetToken);
+            // await sendEmail(forgotPasswordRequest.email, "Test Email", "Hello from hackathon! " + passwordResetToken);
+            await this.emailService.SendPasswordResetEmail(forgotPasswordRequest.email, passwordResetToken);
         } catch(error){
-            throw AppError.badRequest("failed to send email");
+            throw error;
         }
         
     }

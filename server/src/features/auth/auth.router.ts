@@ -1,10 +1,8 @@
 import { Router, Request, Response, NextFunction } from "express"
 import Container from "typedi";
 import AuthService from "./auth.service";
-
 import { changePasswordSchema, forgotPasswordSchema, loginSchema, registerSchema } from "./auth.contracts";
 import { validateData } from "@/common/middleware/validate-request";
-import { verifyLocalToken } from "@/common/utils/jwt-util";
 import { verifyAuth } from "@/common/middleware/verify-auth";
 
 export const authRouter: Router = Router();
@@ -79,7 +77,7 @@ authRouter.post(
 
 })
 
-authRouter.get("/me", verifyAuth, async(req: Request, res: Response, next: NextFunction) => {
+authRouter.get("/auth/me", verifyAuth, async(_req: Request, res: Response, next: NextFunction) => {
 
     try {
         const authService = Container.get(AuthService);
@@ -91,7 +89,4 @@ authRouter.get("/me", verifyAuth, async(req: Request, res: Response, next: NextF
 })
 
 
-
-// ln@sample.com
-// lorenzo123
 
