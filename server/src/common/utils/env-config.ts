@@ -5,10 +5,23 @@ dotenv.config();
 export const env: EnvConfig = {
     port: process.env.PORT || "3001",
     databaseUrl: process.env.DATABASE_URL as string,
+
+    //
     jwtSecret: process.env.JWT_SECRET as string,
     jwtExpiration: process.env.JWT_EXPIRATION || "1d",
     resetTokenSecret: process.env.RESET_TOKEN_SECRET as string,
+
+    //Google Secrets
+    googleClientId: process.env.GOOGE_CLIENT_ID as string,
+    googleClientSecret: process.env.GOOGE_CLIENT_SECRET as string,
+    googleRedirectUrl: process.env.GOOGE_REDIRECT_URL as string,
+
+    //Github Secrets
+    githubClientId: process.env.GITHUB_CLIENT_ID as string,
+    githubClientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+    githubRedirectUrl: process.env.GITHUB_REDIRECT_URL as string
 };
+
 
 export const emailConfig: EmailConfig = {
     host: process.env.EMAIL_HOST || "localhost",
@@ -25,6 +38,17 @@ export type EnvConfig = {
     jwtSecret: string;
     jwtExpiration: string;
     resetTokenSecret: string;
+
+    //Google Secrets
+    googleClientId: string;
+    googleClientSecret: string;
+    googleRedirectUrl: string;
+
+    //
+    githubClientId: string;
+    githubClientSecret: string;
+    githubRedirectUrl: string;
+
 };
 
 export type EmailConfig = {

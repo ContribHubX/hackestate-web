@@ -6,7 +6,9 @@ export const user = pgTable("user", {
     email: varchar("email").notNull().unique(),
     password: varchar("password").notNull(),
     name: varchar("name").notNull(),
+    picture: varchar("picture"),
     createdAt: timestamp("created_at").defaultNow()
 })
 
 export type User = typeof user.$inferSelect;
+export type UserInsert = typeof user.$inferInsert;

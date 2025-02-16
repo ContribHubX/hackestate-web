@@ -1,7 +1,7 @@
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import Container, { Inject, Service } from "typedi";
 import * as schema from "@/database/schema";
-import { User } from "@/database/schema";
+import { User, UserInsert } from "@/database/schema";
 import { LoginSchema, LoginResponse, RegisterSchema, ForgotPasswordSchema, ChangePasswordSchema } from "./auth.contracts";
 import { eq } from "drizzle-orm";
 import { AppError } from "@/common/app-error";
@@ -20,8 +20,6 @@ class AuthService {
     
     private readonly db!: NodePgDatabase<typeof schema>
 
-    
-
     constructor() {
         this.db = Container.get("database");
     }
@@ -31,8 +29,38 @@ class AuthService {
         return users;
     }
 
-    async CreateUser(registerRequest: RegisterSchema) {
-        await this.db.insert(schema.user).values({...registerRequest});
+    async CreateUser(registerRequest: RegisterSchema) : Promise<User> {
+        const [createdUser] = await this.db.insert(schema.user).values({...registerRequest}).returning();
+        return createdUser;
+    }
+
+    async UpdateUser(user: UserInsert) : Promise<User>{        
+        const [updatedUser]  = await this.db.update(schema.user)
+            .set({...user})
+            .where(eq(schema.user.email, user.email))
+            .returning();
+
+        return updatedUser;
+    }
+    
+    async SaveOrUpdateUserById(user: UserInsert) : Promise<User>{
+        const existingUser = await this.db.query.user.findFirst({
+            where: eq(schema.user.id, user.id!)
+        });
+        
+        return (existingUser ? await this.UpdateUser(user): await this.CreateUser({
+            ...user
+        }));
+    }
+
+    async SaveOrUpdateUser(user: UserInsert) : Promise<User>{
+        const existingUser = await this.db.query.user.findFirst({
+            where: eq(schema.user.email, user.email)
+        });
+        
+        return (existingUser ? await this.UpdateUser(user): await this.CreateUser({
+            ...user
+        }));
     }
 
     async Register(registerRequest: RegisterSchema) {

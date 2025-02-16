@@ -4,6 +4,8 @@ import { useMemo } from "react";
 import Login from "./pages/auth/login";
 import AuthRoot from "./pages/auth/root";
 import Signup from "./pages/auth/signup";
+import AppRoot from "./pages/root";
+import OAuthCallback from "./pages/auth/callback";
 
 const createAppRouter = () => 
     createBrowserRouter([
@@ -19,16 +21,22 @@ const createAppRouter = () =>
                 {
                     path: "signup",
                     element: <Signup />
+                },
+                {
+                    path: ":provider/callback",
+                    element: <OAuthCallback />
                 }
             ]
         },
         {
             path: "/",
-            // lazy: async () => {
-            //     const Home = await import("@/pages/home");
-            //     return { Component: Home }
-            // }
-            element: <Home />,
+            element: <AppRoot />,
+            children: [
+                {   
+                    index: true,
+                    element: <Home />
+                }
+            ]
         }
     ])
 

@@ -17,25 +17,40 @@ import { cn } from "@/lib/utils"
 
 
 import { FormInput } from "../ui/form/form.input"
-import { registerSchema, RegisterSchema } from "@/service/auth/register"
-// import { LoginSchema } from "@/service/auth/login"
+import { registerSchema, RegisterSchema, useRegister } from "@/service/auth/register"
+import { useToast } from "@/hooks/use-toast"
+import { Spinner } from "../ui/spinner"
+
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
 
+const { mutate, isPending } = useRegister();
+const {toast} = useToast();
+
 const form = useForm<RegisterSchema>({
   resolver: zodResolver(registerSchema),
   defaultValues: {
       email: "",
-      username: "",
+      name: "",
       password: ""
   }
 })
 
 const onSubmit = (value: RegisterSchema) => {
-      console.log(value)
+  mutate(value, {
+    onSuccess: () => {
+      toast({
+        description: "Register Successful",
+      })
+    },
+    onError: (error: unknown) => {
+      // alert(error.response.data.message);
+      console.log(error)
+    }
+  })
 }
 
  return (
@@ -63,8 +78,8 @@ const onSubmit = (value: RegisterSchema) => {
 
                     <FormInput 
                         control={form.control}
-                        name="username"
-                        label="Username"
+                        name="name"
+                        label="Name"
                         placeholder="JohnDoe"
                         
                     />          
@@ -77,8 +92,11 @@ const onSubmit = (value: RegisterSchema) => {
                         type="password"
                     />
 
-                    <Button type="submit" className="w-full">
-                      Login
+                    <Button type="submit" className="w-full" disabled={isPending}>
+                      {isPending && (
+                        <Spinner size="medium" className="text-card" />
+                      )}  
+                      Sign up
                     </Button>
                     </div>
                   <div className="text-center text-sm">

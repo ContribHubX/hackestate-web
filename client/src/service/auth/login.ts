@@ -1,3 +1,5 @@
+import { api } from "@/lib/axios";
+import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 
 export const loginSchema = z.object({
@@ -9,6 +11,13 @@ export const loginSchema = z.object({
 
 export type LoginSchema = z.infer<typeof loginSchema>;  
 
+const login = async (data: LoginSchema) => {
+    const response = await api.post("/api/auth/login", data);
+    return response.data; 
+}
 
+export const useLogin = () => useMutation({
+    mutationFn: login
+});
 
 

@@ -11,10 +11,15 @@ export default(app: Application) => {
         res.send({ message: "healthy" })
     })
 
+    app.set("trust proxy", 1);
+
     /**
      * Middlewares
      */
-    app.use(cors());
+    app.use(cors({
+        origin: ["https://lvthp97m-5173.asse.devtunnels.ms", "http://localhost:5173"],
+        credentials: true
+    }));
     app.use(express.json());
     app.use(cookieParser())
     app.use(HttpContextMiddleware);
