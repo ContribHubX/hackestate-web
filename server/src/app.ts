@@ -4,6 +4,7 @@ import { env } from "./common/utils/env-config";
 import socketHandler from "./startups/socket";
 import { Server as IOServer } from "socket.io";
 import { Server } from "http";
+import { corsConfig } from "./common/utils/cors";
 
 async function main() {
     const app = express();
@@ -15,7 +16,7 @@ async function main() {
     serverListener = app.listen(PORT, () => {
         console.log(`Running on port: ${PORT}`)
 
-        socketHandler(new IOServer(serverListener))
+        socketHandler(new IOServer(serverListener, corsConfig))
     })
 }
 

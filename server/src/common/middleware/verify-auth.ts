@@ -10,7 +10,6 @@ export async function verifyAuth(
 ) {
   try {
     const token = req.cookies.token;
-    console.log("token: ", token);
     
     if (!token) {
       throw AppError.unauthorized("Access token missing");

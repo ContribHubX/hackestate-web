@@ -5,6 +5,7 @@ import { authRouter } from "@/features/auth/auth.router";
 import { errorHandler } from "@/common/middleware/error-handler";
 import { HttpContextMiddleware } from "@/common/middleware/http-context";
 import cookieParser from "cookie-parser";
+import { corsConfig } from "@/common/utils/cors";
 
 export default(app: Application) => {
     app.use("/status", (req, res) => {
@@ -16,10 +17,7 @@ export default(app: Application) => {
     /**
      * Middlewares
      */
-    app.use(cors({
-        origin: ["https://lvthp97m-5173.asse.devtunnels.ms", "http://localhost:5173"],
-        credentials: true
-    }));
+    app.use(cors(corsConfig.cors));
     app.use(express.json());
     app.use(cookieParser())
     app.use(HttpContextMiddleware);
