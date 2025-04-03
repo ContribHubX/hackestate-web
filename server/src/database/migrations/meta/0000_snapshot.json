@@ -1,5 +1,5 @@
 {
-  "id": "2d9e53c4-3d81-439d-8bae-426bf87e669c",
+  "id": "521857d8-4306-4ea7-8aa1-dfeccc68b9a7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -8,29 +8,23 @@
       "name": "user",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "pid": {
+          "name": "pid",
           "type": "varchar",
           "primaryKey": true,
-          "notNull": true
-        },
-        "email": {
-          "name": "email",
-          "type": "varchar",
-          "primaryKey": false,
           "notNull": true
         },
         "password": {
           "name": "password",
           "type": "varchar",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
-        "name": {
-          "name": "name",
-          "type": "varchar",
+        "dob": {
+          "name": "dob",
+          "type": "date",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -43,15 +37,64 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "user_email_unique": {
-          "name": "user_email_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.test_results": {
+      "name": "test_results",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_pid": {
+          "name": "user_pid",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "test_name": {
+          "name": "test_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "binary_pdf": {
+          "name": "binary_pdf",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "test_date": {
+          "name": "test_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
         }
       },
+      "indexes": {},
+      "foreignKeys": {
+        "test_results_user_pid_user_pid_fk": {
+          "name": "test_results_user_pid_user_pid_fk",
+          "tableFrom": "test_results",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_pid"
+          ],
+          "columnsTo": [
+            "pid"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

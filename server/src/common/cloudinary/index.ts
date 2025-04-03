@@ -4,7 +4,6 @@ import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { AppError } from "../app-error";
 import multer from "multer";
 
-
 cloudinary.config({
     cloud_name: c.cloudName,
     api_key: c.apiKey,
@@ -53,6 +52,5 @@ const uploadLimit = 25 * 1024 * 1024;
 
 export const uploadProfile = multer({
     storage: createStorage("profile"),
-    limits: { fieldSize: uploadLimit },  
+    limits: { fieldSize: uploadLimit },
 });
-  

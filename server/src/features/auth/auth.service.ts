@@ -1,8 +1,8 @@
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
-import Container, { Inject, Service } from "typedi";
+import { Container, Inject, Service } from "typedi";
 import * as schema from "@/database/schema";
 import { User, UserInsert } from "@/database/schema";
-import { LoginSchema, LoginResponse, RegisterSchema, ForgotPasswordSchema, ChangePasswordSchema } from "./auth.contracts";
+import { LoginSchema, LoginResponse, RegisterSchema, ForgotPasswordSchema, ChangePasswordSchema, CheckPidResponse } from "./auth.contracts";
 import { eq } from "drizzle-orm";
 import { AppError } from "@/common/app-error";
 import bcrypt from "bcrypt";
@@ -14,10 +14,10 @@ import EmailService from "@/common/utils/email-service";
 class AuthService {
     @Inject(() => HttpContextService)
     private readonly httpContext!: HttpContextService;
-    
+
     @Inject(() => EmailService)
     private readonly emailService!: EmailService;
-    
+
     private readonly db!: NodePgDatabase<typeof schema>
 
     constructor() {
@@ -34,69 +34,90 @@ class AuthService {
         return createdUser;
     }
 
-    async UpdateUser(user: UserInsert) : Promise<User>{        
+    async UpdateUser(user: UserInsert) : Promise<User>{
         const [updatedUser]  = await this.db.update(schema.user)
             .set({...user})
-            .where(eq(schema.user.email, user.email))
+            .where(eq(schema.user.pid, user.pid!))
             .returning();
 
         return updatedUser;
     }
-    
-    async SaveOrUpdateUserById(user: UserInsert) : Promise<User>{
-        const existingUser = await this.db.query.user.findFirst({
-            where: eq(schema.user.id, user.id!)
-        });
-        
-        return (existingUser ? await this.UpdateUser(user): await this.CreateUser({
-            ...user
-        }));
-    }
 
-    async SaveOrUpdateUser(user: UserInsert) : Promise<User>{
-        const existingUser = await this.db.query.user.findFirst({
-            where: eq(schema.user.email, user.email)
-        });
-        
-        return (existingUser ? await this.UpdateUser(user): await this.CreateUser({
-            ...user
-        }));
-    }
+    // async SaveOrUpdateUserById(user: UserInsert) : Promise<User>{
+    //     const existingUser = await this.db.query.user.findFirst({
+    //         where: eq(schema.user.pid, user.pid!)
+    //     });
+
+    //     return (existingUser ? await this.UpdateUser(user): await this.CreateUser({
+    //         ...user
+    //     }));
+    // }
+
+    // async SaveOrUpdateUser(user: UserInsert) : Promise<User>{
+    //     const existingUser = await this.db.query.user.findFirst({
+    //         where: eq(schema.user.email, user.email)
+    //     });
+
+    //     return (existingUser ? await this.UpdateUser(user): await this.CreateUser({
+    //         ...user
+    //     }));
+    // }
 
     async Register(registerRequest: RegisterSchema) {
         const existingUser = await this.db.query.user.findFirst({
-            where: eq(schema.user.email, registerRequest.email)
+            where: eq(schema.user.pid, registerRequest.pid)
         });
 
         if (existingUser){
             throw AppError.badRequest("User already exist");
         }
 
-        const hashedPassword = await bcrypt.hash(registerRequest.password, 10);
 
         await this.CreateUser({
-            ...registerRequest,
-            password: hashedPassword
+            ...registerRequest
         });
-    
+
     }
 
-    async Login(loginRequest: LoginSchema) : Promise<LoginResponse> {
-        const existingUser = await this.db.query.user.findFirst({
-            where: eq(schema.user.email, loginRequest.email)
-        });
+    // async Login(loginRequest: LoginSchema) : Promise<LoginResponse> {
+    //     const existingUser = await this.db.query.user.findFirst({
+    //         where: eq(schema.user.email, loginRequest.email)
+    //     });
 
+
+    //     if(!existingUser){
+    //         throw AppError.notFound("User doesn't exist");
+    //     }
+
+    //     const isMatch = await bcrypt.compare(loginRequest.password, existingUser.password);
+
+    //     if(!isMatch){
+    //         throw AppError.forbidden("Invalid Credentials");
+    //     }
+
+    //     const token = provideToken(existingUser);
+
+    //     return {
+    //         user: existingUser,
+    //         token
+    //     }
+    // }
+
+    async Login(loginRequest : LoginSchema) : Promise<LoginResponse>{
+        const existingUser = await this.db.query.user.findFirst({
+            where : eq(schema.user.pid, loginRequest.pid)
+        });
 
         if(!existingUser){
             throw AppError.notFound("User doesn't exist");
         }
 
-        const isMatch = await bcrypt.compare(loginRequest.password, existingUser.password);
+        const isMatch = await bcrypt.compare(loginRequest.password, existingUser.password!);
 
         if(!isMatch){
             throw AppError.forbidden("Invalid Credentials");
         }
-        
+
         const token = provideToken(existingUser);
 
         return {
@@ -105,40 +126,68 @@ class AuthService {
         }
     }
 
-    async ForgotPassword(forgotPasswordRequest: ForgotPasswordSchema){
-        try{
-            const userId = this.httpContext.getRequest().currentUser?.id;
-            const passwordResetToken = providePasswordResetToken(userId!);
-            // await sendEmail(forgotPasswordRequest.email, "Test Email", "Hello from hackathon! " + passwordResetToken);
-            await this.emailService.SendPasswordResetEmail(forgotPasswordRequest.email, passwordResetToken);
-        } catch(error){
-            throw error;
+    async CheckPid(pid: string) : Promise<CheckPidResponse>{
+        const existingUser = await this.db.query.user.findFirst({
+            where : eq(schema.user.pid, pid)
+        });
+
+        if(!existingUser){
+            return {
+                hasPassword : false,
+                hasPid : false,
+                pid
+            }
         }
-        
+
+        if(!existingUser.password){
+            return {
+                hasPassword : false,
+                hasPid : true,
+                pid
+            }
+        }
+
+        return {
+            hasPassword : true,
+            hasPid : true,
+            pid
+        };
     }
 
-    async ChangePassword(changePasswordRequest: ChangePasswordSchema){
-        const userId = verifyPasswordResetToken(changePasswordRequest.passwordResetToken);
+    // async ForgotPassword(forgotPasswordRequest: ForgotPasswordSchema){
+    //     try{
+    //         const userId = this.httpContext.getRequest().currentUser?.pid;
+    //         const passwordResetToken = providePasswordResetToken(userId!);
+    //         // await sendEmail(forgotPasswordRequest.email, "Test Email", "Hello from hackathon! " + passwordResetToken);
+    //         await this.emailService.SendPasswordResetEmail(forgotPasswordRequest.email, passwordResetToken);
+    //     } catch(error){
+    //         throw error;
+    //     }
 
-        if(!userId){
-            throw AppError.forbidden("Invalid or expired reset token");
-        }
+    // }
 
-        const hashedPassword = await bcrypt.hash(changePasswordRequest.newPassword, 10);
-        
-        const updatedUser = await this.db.update(schema.user)
-            .set({password: hashedPassword})
-            .where(eq(schema.user.id, userId))
-            .returning({
-                id: schema.user.id
-            });
-        
-        if(!updatedUser.length){
-            throw AppError.notFound("User not found or password update failed");
-        }
+    // async ChangePassword(changePasswordRequest: ChangePasswordSchema){
+    //     const userId = verifyPasswordResetToken(changePasswordRequest.passwordResetToken);
 
-        return { message: "Password changed successfully" };
-    }
+    //     if(!userId){
+    //         throw AppError.forbidden("Invalid or expired reset token");
+    //     }
+
+    //     const hashedPassword = await bcrypt.hash(changePasswordRequest.newPassword, 10);
+
+    //     const updatedUser = await this.db.update(schema.user)
+    //         .set({password: hashedPassword})
+    //         .where(eq(schema.user.pid, userId))
+    //         .returning({
+    //             id: schema.user.pid
+    //         });
+
+    //     if(!updatedUser.length){
+    //         throw AppError.notFound("User not found or password update failed");
+    //     }
+
+    //     return { message: "Password changed successfully" };
+    // }
 
     async GetUser() : Promise<User | undefined>{
         return this.httpContext.getRequest().currentUser;

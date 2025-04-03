@@ -1,14 +1,12 @@
-import { pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
+import { date, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
 import { uuid } from "uuidv4";
 
 export const user = pgTable("user", {
-    id: varchar("id").notNull().primaryKey().$defaultFn(uuid),
-    email: varchar("email").notNull().unique(),
-    password: varchar("password").notNull(),
-    name: varchar("name").notNull(),
-    picture: varchar("picture"),
-    createdAt: timestamp("created_at").defaultNow()
-})
+  pid: varchar("pid").notNull().primaryKey().$defaultFn(uuid),
+  password: varchar("password"),
+  dob: date("dob"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
 
 export type User = typeof user.$inferSelect;
 export type UserInsert = typeof user.$inferInsert;

@@ -6,9 +6,10 @@ import { errorHandler } from "@/common/middleware/error-handler";
 import { HttpContextMiddleware } from "@/common/middleware/http-context";
 import cookieParser from "cookie-parser";
 import { corsConfig } from "@/common/utils/cors";
+import { testResultRouter } from "@/features/testResults/test-result.router";
 
 export default(app: Application) => {
-    app.use("/status", (req, res) => {
+    app.use("/api/status", (req, res) => {
         res.send({ message: "healthy" })
     })
 
@@ -26,6 +27,7 @@ export default(app: Application) => {
      * Routes
     */
     app.use("/api", authRouter);
+    app.use("/api", testResultRouter);
 
 
     dependencyInjection();

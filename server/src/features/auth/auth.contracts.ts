@@ -5,18 +5,14 @@ import {z} from "zod";
 
 export const loginSchema = z.object(
     {
-        email: z.string().email(),
+        pid: z.string(),
         password: passwordSchema
     }
 )
 
 export const registerSchema = z.object(
     {
-        email: z.string().email(),
-        name: z.string().min(5, {
-            message: "Name must have at least 5 characters"
-        }),
-        password: passwordSchema
+        pid : z.string()
     }
 )
 
@@ -40,10 +36,16 @@ export type RegisterSchema = z.infer<typeof registerSchema>
 
 export type ForgotPasswordSchema = z.infer<typeof forgotPasswordSchema>;
 export type ForgotPasswordResponse = {
-    
+
 }
 
 export type ChangePasswordSchema = z.infer<typeof changePasswordSchema>;
 export type ChangePasswordResponse = {
-    
+
+}
+
+export type CheckPidResponse = {
+    hasPassword : boolean;
+    hasPid: boolean;
+    pid : string;
 }
