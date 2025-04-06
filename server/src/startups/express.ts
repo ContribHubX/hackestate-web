@@ -6,7 +6,7 @@ import { errorHandler } from "@/common/middleware/error-handler";
 import { HttpContextMiddleware } from "@/common/middleware/http-context";
 import cookieParser from "cookie-parser";
 import { corsConfig } from "@/common/utils/cors";
-import { testResultRouter } from "@/features/testResults/test-result.router";
+import { testResultRouter } from "@/features/test-result/test-result.router";
 
 export default(app: Application) => {
     app.use("/api/status", (req, res) => {

@@ -1,4 +1,6 @@
+// import { api } from "@/lib/axios";
 import { api } from "@/lib/axios";
+import { User } from "@/types/user";
 import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 
@@ -9,15 +11,36 @@ export const loginSchema = z.object({
     })
 })
 
-export type LoginSchema = z.infer<typeof loginSchema>;  
-
-const login = async (data: LoginSchema) => {
-    const response = await api.post("/api/auth/login", data);
-    return response.data; 
+export type LoginSchema = z.infer<typeof loginSchema>;
+export type LoginResponse = {
+    token: string;
+    admin: User;
 }
 
+const login = async (data: LoginSchema) : Promise<LoginResponse> => {
+    const response = await api.post<LoginResponse>("/api/auth/admin/login", data);
+    return response.data;
+}
+
+// const simulatedLogin = async (data: LoginSchema): Promise<LoginResponse> => {
+//     return new Promise((resolve) => {
+//         setTimeout(() => {
+//             resolve({
+//                 token: "mocked-jwt-token-1234567890",
+//                 user: {
+//                     id: "user-123",
+//                     email: data.email,
+//                     name: "Jane Doe",
+//                     createdAt: new Date(),
+//                     updatedAt: new Date(),
+//                 },
+//             });
+//         }, 300);
+//     });
+// };
+
 export const useLogin = () => useMutation({
-    mutationFn: login
+    mutationFn: login // todo replace with real implementation
 });
 
 

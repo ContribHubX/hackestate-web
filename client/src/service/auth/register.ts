@@ -14,11 +14,11 @@ export const registerSchema = z.object({
     })
 })
 
-export type RegisterSchema = z.infer<typeof registerSchema>;  
+export type RegisterSchema = z.infer<typeof registerSchema>;
 
 const register = async (data: RegisterSchema) => {
     const response = await api.post("/api/auth/register", data);
-    return response.data; 
+    return response.data;
 }
 
 export const useRegister = () => useMutation({

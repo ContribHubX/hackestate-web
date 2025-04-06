@@ -1,11 +1,11 @@
 import { PropsWithChildren } from "react"
 import { ModeToggle } from "../ui/mode-toggle"
 
-const AuthLayout = ({ children }: PropsWithChildren) => {
+const AppLayout = ({ children }: PropsWithChildren) => {
 
   return (
-    <div className="bg-muted h-screen">
-        <header className="p-2 absolute right-1">
+    <div className="h-screen container bg-background mx-auto">
+        <header className="py-2 flex justify-end">
             <ModeToggle />
         </header>
 
@@ -16,4 +16,4 @@ const AuthLayout = ({ children }: PropsWithChildren) => {
   )
 }
 
-export default AuthLayout
+export default AppLayout

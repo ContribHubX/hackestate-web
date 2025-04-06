@@ -7,5 +7,8 @@ type BaseEntity = {
 
 export type Entity<T> = BaseEntity & T;
 
-
-
+export type UploadedFile = {
+  file: File
+  id: string
+  preview?: string
+}

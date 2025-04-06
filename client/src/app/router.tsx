@@ -5,15 +5,15 @@ import Login from "./pages/auth/login";
 import AuthRoot from "./pages/auth/root";
 import Signup from "./pages/auth/signup";
 import AppRoot from "./pages/root";
-import OAuthCallback from "./pages/auth/callback";
+import Dashboard from "./pages/dashboard/page";
 
-const createAppRouter = () => 
+const createAppRouter = () =>
     createBrowserRouter([
         {
             path: "/auth",
             element: <AuthRoot />,
             children: [
-                {   
+                {
                     index: true,
                     path: "login",
                     element: <Login />
@@ -22,25 +22,26 @@ const createAppRouter = () =>
                     path: "signup",
                     element: <Signup />
                 },
-                {
-                    path: ":provider/callback",
-                    element: <OAuthCallback />
-                }
             ]
         },
         {
             path: "/",
             element: <AppRoot />,
             children: [
-                {   
+                {
                     index: true,
                     element: <Home />
-                }
+                },
+                {
+                  path: "/dashboard",
+                  index: true,
+                  element: <Dashboard />
+              }
             ]
         }
     ])
 
-    
+
 export const AppRouter = () => {
     const router = useMemo(() => createAppRouter(), []);
 

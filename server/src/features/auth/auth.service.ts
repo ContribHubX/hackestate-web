@@ -1,197 +1,184 @@
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Container, Inject, Service } from "typedi";
 import * as schema from "@/database/schema";
-import { User, UserInsert } from "@/database/schema";
-import { LoginSchema, LoginResponse, RegisterSchema, ForgotPasswordSchema, ChangePasswordSchema, CheckPidResponse } from "./auth.contracts";
+import { User, UserInsert, Admin } from "@/database/schema";
+import {
+  LoginSchema,
+  LoginResponse,
+  RegisterSchema,
+  ForgotPasswordSchema,
+  ChangePasswordSchema,
+  CheckPidResponse,
+  LoginAdminSchema,
+  LoginAdminResponse,
+  RegisterAdminSchema,
+} from "./auth.contracts";
 import { eq } from "drizzle-orm";
 import { AppError } from "@/common/app-error";
 import bcrypt from "bcrypt";
-import { providePasswordResetToken, provideToken, verifyPasswordResetToken } from "@/common/utils/jwt-util";
+import {
+  providePasswordResetToken,
+  provideToken,
+  verifyPasswordResetToken,
+} from "@/common/utils/jwt-util";
 import { HttpContextService } from "@/common/http-context";
 import EmailService from "@/common/utils/email-service";
 
 @Service()
 class AuthService {
-    @Inject(() => HttpContextService)
-    private readonly httpContext!: HttpContextService;
+  @Inject(() => HttpContextService)
+  private readonly httpContext!: HttpContextService;
 
-    @Inject(() => EmailService)
-    private readonly emailService!: EmailService;
+  @Inject(() => EmailService)
+  private readonly emailService!: EmailService;
 
-    private readonly db!: NodePgDatabase<typeof schema>
+  private readonly db!: NodePgDatabase<typeof schema>;
 
-    constructor() {
-        this.db = Container.get("database");
+  constructor() {
+    this.db = Container.get("database");
+  }
+
+  async GetUsers(): Promise<User[]> {
+    const users = await this.db.query.user.findMany({});
+    return users;
+  }
+
+  async CreateUser(registerRequest: RegisterSchema): Promise<User> {
+    const [createdUser] = await this.db
+      .insert(schema.user)
+      .values({ ...registerRequest })
+      .returning();
+    return createdUser;
+  }
+
+  async UpdateUser(user: UserInsert): Promise<User> {
+    const [updatedUser] = await this.db
+      .update(schema.user)
+      .set({ ...user })
+      .where(eq(schema.user.pid, user.pid!))
+      .returning();
+
+    return updatedUser;
+  }
+
+  async Register(registerRequest: RegisterSchema) {
+    const existingUser = await this.db.query.user.findFirst({
+      where: eq(schema.user.pid, registerRequest.pid),
+    });
+
+    if (existingUser) {
+      throw AppError.badRequest("User already exist");
     }
 
-    async GetUsers() : Promise<User[]>{
-        const users = await this.db.query.user.findMany({});
-        return users;
+    await this.CreateUser({
+      ...registerRequest,
+    });
+  }
+
+  async RegisterAdmin(
+    registerAdminRequest: RegisterAdminSchema
+  ): Promise<Admin> {
+    const existingAdmin = await this.db.query.admin.findFirst({
+      where: eq(schema.admin.email, registerAdminRequest.email),
+    });
+
+    if (existingAdmin) {
+      throw AppError.badRequest("admin already exists");
     }
 
-    async CreateUser(registerRequest: RegisterSchema) : Promise<User> {
-        const [createdUser] = await this.db.insert(schema.user).values({...registerRequest}).returning();
-        return createdUser;
+    const [createdAdmin] = await this.db
+      .insert(schema.admin)
+      .values({ ...registerAdminRequest })
+      .returning();
+
+    return createdAdmin;
+  }
+
+  async Login(loginRequest: LoginSchema): Promise<LoginResponse> {
+    const existingUser = await this.db.query.user.findFirst({
+      where: eq(schema.user.pid, loginRequest.pid),
+    });
+
+    if (!existingUser) {
+      throw AppError.notFound("User doesn't exist");
     }
 
-    async UpdateUser(user: UserInsert) : Promise<User>{
-        const [updatedUser]  = await this.db.update(schema.user)
-            .set({...user})
-            .where(eq(schema.user.pid, user.pid!))
-            .returning();
+    const isMatch = await bcrypt.compare(
+      loginRequest.password,
+      existingUser.password!
+    );
 
-        return updatedUser;
+    if (!isMatch) {
+      throw AppError.forbidden("Invalid Credentials");
     }
 
-    // async SaveOrUpdateUserById(user: UserInsert) : Promise<User>{
-    //     const existingUser = await this.db.query.user.findFirst({
-    //         where: eq(schema.user.pid, user.pid!)
-    //     });
+    const token = provideToken(existingUser);
 
-    //     return (existingUser ? await this.UpdateUser(user): await this.CreateUser({
-    //         ...user
-    //     }));
-    // }
+    return {
+      user: existingUser,
+      token,
+    };
+  }
 
-    // async SaveOrUpdateUser(user: UserInsert) : Promise<User>{
-    //     const existingUser = await this.db.query.user.findFirst({
-    //         where: eq(schema.user.email, user.email)
-    //     });
+  async LoginAdmin(
+    loginAdminSchema: LoginAdminSchema
+  ): Promise<LoginAdminResponse> {
+    const existingAdmin = await this.db.query.admin.findFirst({
+      where: eq(schema.admin.email, loginAdminSchema.email),
+    });
 
-    //     return (existingUser ? await this.UpdateUser(user): await this.CreateUser({
-    //         ...user
-    //     }));
-    // }
-
-    async Register(registerRequest: RegisterSchema) {
-        const existingUser = await this.db.query.user.findFirst({
-            where: eq(schema.user.pid, registerRequest.pid)
-        });
-
-        if (existingUser){
-            throw AppError.badRequest("User already exist");
-        }
-
-
-        await this.CreateUser({
-            ...registerRequest
-        });
-
+    if (!existingAdmin) {
+      throw AppError.notFound("User doesn't exist");
     }
 
-    // async Login(loginRequest: LoginSchema) : Promise<LoginResponse> {
-    //     const existingUser = await this.db.query.user.findFirst({
-    //         where: eq(schema.user.email, loginRequest.email)
-    //     });
+    const isMatch = await bcrypt.compare(
+      loginAdminSchema.password,
+      existingAdmin.password!
+    );
 
-
-    //     if(!existingUser){
-    //         throw AppError.notFound("User doesn't exist");
-    //     }
-
-    //     const isMatch = await bcrypt.compare(loginRequest.password, existingUser.password);
-
-    //     if(!isMatch){
-    //         throw AppError.forbidden("Invalid Credentials");
-    //     }
-
-    //     const token = provideToken(existingUser);
-
-    //     return {
-    //         user: existingUser,
-    //         token
-    //     }
-    // }
-
-    async Login(loginRequest : LoginSchema) : Promise<LoginResponse>{
-        const existingUser = await this.db.query.user.findFirst({
-            where : eq(schema.user.pid, loginRequest.pid)
-        });
-
-        if(!existingUser){
-            throw AppError.notFound("User doesn't exist");
-        }
-
-        const isMatch = await bcrypt.compare(loginRequest.password, existingUser.password!);
-
-        if(!isMatch){
-            throw AppError.forbidden("Invalid Credentials");
-        }
-
-        const token = provideToken(existingUser);
-
-        return {
-            user: existingUser,
-            token
-        }
+    if (!isMatch) {
+      throw AppError.forbidden("Invalid Credentials");
     }
 
-    async CheckPid(pid: string) : Promise<CheckPidResponse>{
-        const existingUser = await this.db.query.user.findFirst({
-            where : eq(schema.user.pid, pid)
-        });
+    const token = provideToken(existingAdmin);
 
-        if(!existingUser){
-            return {
-                hasPassword : false,
-                hasPid : false,
-                pid
-            }
-        }
+    return {
+      admin: existingAdmin,
+      token,
+    };
+  }
 
-        if(!existingUser.password){
-            return {
-                hasPassword : false,
-                hasPid : true,
-                pid
-            }
-        }
+  async CheckPid(pid: string): Promise<CheckPidResponse> {
+    const existingUser = await this.db.query.user.findFirst({
+      where: eq(schema.user.pid, pid),
+    });
 
-        return {
-            hasPassword : true,
-            hasPid : true,
-            pid
-        };
+    if (!existingUser) {
+      return {
+        hasPassword: false,
+        hasPid: false,
+        pid,
+      };
     }
 
-    // async ForgotPassword(forgotPasswordRequest: ForgotPasswordSchema){
-    //     try{
-    //         const userId = this.httpContext.getRequest().currentUser?.pid;
-    //         const passwordResetToken = providePasswordResetToken(userId!);
-    //         // await sendEmail(forgotPasswordRequest.email, "Test Email", "Hello from hackathon! " + passwordResetToken);
-    //         await this.emailService.SendPasswordResetEmail(forgotPasswordRequest.email, passwordResetToken);
-    //     } catch(error){
-    //         throw error;
-    //     }
-
-    // }
-
-    // async ChangePassword(changePasswordRequest: ChangePasswordSchema){
-    //     const userId = verifyPasswordResetToken(changePasswordRequest.passwordResetToken);
-
-    //     if(!userId){
-    //         throw AppError.forbidden("Invalid or expired reset token");
-    //     }
-
-    //     const hashedPassword = await bcrypt.hash(changePasswordRequest.newPassword, 10);
-
-    //     const updatedUser = await this.db.update(schema.user)
-    //         .set({password: hashedPassword})
-    //         .where(eq(schema.user.pid, userId))
-    //         .returning({
-    //             id: schema.user.pid
-    //         });
-
-    //     if(!updatedUser.length){
-    //         throw AppError.notFound("User not found or password update failed");
-    //     }
-
-    //     return { message: "Password changed successfully" };
-    // }
-
-    async GetUser() : Promise<User | undefined>{
-        return this.httpContext.getRequest().currentUser;
+    if (!existingUser.password) {
+      return {
+        hasPassword: false,
+        hasPid: true,
+        pid,
+      };
     }
+
+    return {
+      hasPassword: true,
+      hasPid: true,
+      pid,
+    };
+  }
+
+  async GetUser(): Promise<User | undefined> {
+    return this.httpContext.getRequest().currentUser;
+  }
 }
 
 export default AuthService;
