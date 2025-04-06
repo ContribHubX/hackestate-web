@@ -1,5 +1,5 @@
 import { passwordSchema } from "@/common/utils/common-validation";
-import { Admin } from "@/database/schema/admin";
+import { Admin, adminRole } from "@/database/schema/admin";
 import { User } from "@/database/schema/user";
 import {z} from "zod";
 
@@ -9,13 +9,6 @@ export const loginSchema = z.object(
         pid: z.string(),
         password: passwordSchema
     }
-)
-
-export const adminLoginSchema = z.object(
-  {
-      email: z.string().email(),
-      password: passwordSchema
-  }
 )
 
 export const loginAdminSchema = z.object({
@@ -30,7 +23,9 @@ export const registerSchema = z.object(
 )
 
 export const registerAdminSchema = z.object({
-    email: z.strin
+    email: z.string().email(),
+    password: passwordSchema,
+    role : z.enum([...adminRole.enumValues])
 })
 
 export const forgotPasswordSchema = z.object({
@@ -49,13 +44,14 @@ export type LoginResponse = {
     user: User;
 }
 
-export type LoginAdminSchema = z.infer<typeof adminLoginSchema>;
+export type LoginAdminSchema = z.infer<typeof loginAdminSchema>;
 export type LoginAdminResponse = {
     token: string;
     admin: Admin;
 }
 
 export type RegisterSchema = z.infer<typeof registerSchema>
+export type RegisterAdminSchema = z.infer<typeof registerAdminSchema>;
 
 export type ForgotPasswordSchema = z.infer<typeof forgotPasswordSchema>;
 export type ForgotPasswordResponse = {
