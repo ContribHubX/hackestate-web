@@ -11,4 +11,5 @@ export type UploadedFile = {
   file: File
   id: string
   preview?: string
+  valid: boolean
 }

@@ -40,7 +40,7 @@ const login = async (data: LoginSchema) : Promise<LoginResponse> => {
 // };
 
 export const useLogin = () => useMutation({
-    mutationFn: login // todo replace with real implementation
+    mutationFn: login
 });
 
 

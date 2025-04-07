@@ -9,16 +9,20 @@ const initialState: AuthState = {
     user: null
 }
 
+const tokenKey = "authToken";
+
 export const authSlice = createSlice({
     name: "auth",
     initialState,
     reducers: {
         loginUser: (state, action: PayloadAction<{ admin: User, token: string }>) => {
             state.user = action.payload.admin;
-            localStorage.setItem("authToken", action.payload.token);
+            localStorage.setItem(tokenKey, action.payload.token);
         },
         logoutUser: (state) => {
             state.user = null;
+            localStorage.removeItem(tokenKey);
+            window.location.href = "/auth/login";
         }
     }
 })

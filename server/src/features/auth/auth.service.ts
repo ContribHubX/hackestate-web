@@ -86,9 +86,14 @@ class AuthService {
       throw AppError.badRequest("admin already exists");
     }
 
+    const hashedPassword = await bcrypt.hash(registerAdminRequest.password, 10);
+
     const [createdAdmin] = await this.db
       .insert(schema.admin)
-      .values({ ...registerAdminRequest })
+      .values({
+        ...registerAdminRequest,
+        password: hashedPassword
+      })
       .returning();
 
     return createdAdmin;

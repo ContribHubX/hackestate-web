@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
-import Container from "typedi";
+import { Container } from "typedi";
 import AuthService from "./auth.service";
 import {
   loginAdminSchema,
@@ -8,6 +8,7 @@ import {
   registerSchema,
 } from "./auth.contracts";
 import { validateData } from "@/common/middleware/validate-request";
+import { verifyAuth } from "@/common/middleware/verify-auth";
 
 
 export const authRouter: Router = Router();
@@ -67,6 +68,26 @@ authRouter.post(
     }
   }
 );
+
+authRouter.get(
+  "/auth/me",
+  verifyAuth,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const authService = Container.get(AuthService);
+      const admin = await authService.GetUser();
+
+      res.status(200).json({
+        admin,
+        token: req.token
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+
 
 
 

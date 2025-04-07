@@ -58,14 +58,14 @@ export const columns: ColumnDef<TestResult>[] = [
     },
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: "testDate",
     header: ({ column }) => (
       <div className="flex items-center space-x-1 font-medium">
         <span>Date</span>
       </div>
     ),
     cell: ({ row }) => {
-      const date = new Date(row.original.createdAt!)
+      const date = new Date(row.original.testDate!)
 
       const formatted = date.toLocaleDateString("en-US", {
         year: "numeric",

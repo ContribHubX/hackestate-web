@@ -4,7 +4,7 @@ import { env } from "./env-config";
 export function provideToken(payload: JwtPayload): string {
     const expiration = env.jwtExpiration;
     const token = jwt.sign(
-        payload, 
+        payload,
         env.jwtSecret,
         {expiresIn: expiration || "1d"} as SignOptions
     )
