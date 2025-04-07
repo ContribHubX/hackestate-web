@@ -2,7 +2,8 @@ import { AppError } from "../app-error";
 import { Request, Response, NextFunction } from "express";;
 import { parseLocalToken, verifyLocalToken } from "../utils/jwt-util";
 import { User } from "@/database/schema";
-import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+const { JsonWebTokenError, TokenExpiredError } = jwt;
 
 type DecodedToken = User & {
   iat?: number;
@@ -23,11 +24,12 @@ export async function verifyAuth(
   }
 
   if (!token) {
-    throw AppError.unauthorized("Access token is missing"); 
+     next(AppError.unauthorized("Access token is missing"));
+     return;
   }
 
   try {
-    let { ok, decoded } = verifyLocalToken(parseLocalToken(token));
+    let { ok, decoded } = verifyLocalToken(token);
     const { iat, exp, password, ...userData } = decoded as DecodedToken;
 
     if (!ok || !decoded) {
@@ -35,7 +37,7 @@ export async function verifyAuth(
     }
 
     req.currentUser = userData as User;
-
+    req.token = token;
     next();
   } catch (error: any) {
     if (error instanceof TokenExpiredError) {

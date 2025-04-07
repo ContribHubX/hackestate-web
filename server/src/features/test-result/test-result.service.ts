@@ -27,6 +27,7 @@ export default class TestResultService {
 
     // upload test result
     async UploadTestResult(file : Express.Multer.File) : Promise<TestResult>{
+        const size = file.size;
         const fileName = file.originalname.replace(".pdf", "");
 
         const parts: string[] = fileName.split("_");
@@ -66,30 +67,41 @@ export default class TestResultService {
             userPid: createdUser ? createdUser.pid : existingUser?.pid!,
             testName,
             testDate,
+            size,
             binaryPdf: file.buffer
         };
 
-        const [createdTestResult] = await this.db.insert(schema.testResult).values(testResult).returning();
+        const [createdTestResult] = await this.db.insert(schema.testResult).values(testResult).returning({
+            id:schema.testResult.id,
+            userPid: schema.testResult.userPid,
+            testName: schema.testResult.testName,
+            size : schema.testResult.size,
+            testDate: schema.testResult.testDate
+        });
 
         return createdTestResult as unknown as TestResult;
     }
 
     // Get test results for user via user context
     async GetTestResults() : Promise<TestResultDtoMinimal[]> {
-        // const currentUser = this.httpContext.getRequest().currentUser;
+        const currentUser = this.httpContext.getRequest().currentUser;
 
-        // const testResults = await this.db.query.testResult.findMany({
-        //     where : (results, {eq}) => eq(results.userPid, currentUser?.pid!),
-        // });
+        let testResults;
+        if(!currentUser?.pid){
+            //for admin
+            console.log("admin is fetching...");
+            testResults = await this.db.query.testResult.findMany({
+              columns: { id: true, testName: true, userPid: true , testDate: true, size:true, binaryPdf: false }
+            });
+        } else {
+            //for user
+          testResults = await this.db.query.testResult.findMany({
+              where : (results, {eq}) => eq(results.userPid, currentUser?.pid!),
+              columns: { id: true, testName: true, userPid: true , testDate: true, size:true, binaryPdf: false }
+          });
+        }
 
-        const currentUser = "12345";
-
-        const testResults = await this.db.query.testResult.findMany({
-            where : (results, {eq}) => eq(results.userPid, currentUser!),
-        });
-
-
-        return testResults.map(({ binaryPdf, ...rest }) => rest);
+        return testResults;
     }
 
     async GetTestResult(id: string) : Promise<TestResultDto>{

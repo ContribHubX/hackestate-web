@@ -13,7 +13,7 @@ const Home = () => {
   return (
     <div className="">
       <ModeToggle/>
-      <h1>Welcome: {user.name} {user.email}</h1>
+      <h1>Welcome: {user.email}</h1>
 
       <p>Home Page lorem200</p>
     </div>

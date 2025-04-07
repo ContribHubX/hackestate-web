@@ -1,4 +1,4 @@
-import { customType, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
+import { customType, integer, pgTable, timestamp, varchar,  } from "drizzle-orm/pg-core";
 import { uuid } from "uuidv4";
 import { user } from "./user";
 
@@ -18,6 +18,7 @@ export const testResult = pgTable("test_results", {
     .references(() => user.pid, { onDelete: "cascade" }),
   testName: varchar("test_name").notNull(),
   binaryPdf: bytea("binary_pdf").notNull(),
+  size: integer("size").notNull(),
   testDate: timestamp("test_date", { mode: "date" }).notNull(),
 });
 

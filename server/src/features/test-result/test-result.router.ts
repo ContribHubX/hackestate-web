@@ -14,6 +14,8 @@ testResultRouter.post(
   "/test-result",
   upload.single("file"),
   async (req: Request, res: Response, next: NextFunction) => {
+    console.log(`File: ${req.file}`);
+
     try {
       if (!req.file) {
          res.status(400).json({ message: "No file uploaded" });
@@ -24,6 +26,7 @@ testResultRouter.post(
 
       const testResultService = Container.get(TestResultService);
       const results = await testResultService.UploadTestResult(file);
+      // Reflect.deleteProperty(results, "binaryPdf");
 
       res.status(201).json({ results });
     } catch (error) {
@@ -40,7 +43,7 @@ testResultRouter.get(
       const testResultService = Container.get(TestResultService);
       const results = await testResultService.GetTestResults();
 
-      res.status(200).json({ results });
+      res.status(200).json([ ...results ]);
     } catch (error) {
       next(error);
     }

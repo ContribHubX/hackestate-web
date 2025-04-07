@@ -6,12 +6,16 @@ import AuthRoot from "./pages/auth/root";
 import Signup from "./pages/auth/signup";
 import AppRoot from "./pages/root";
 import Dashboard from "./pages/dashboard/page";
+// import AuthGuard from "@/components/auth/auth-guard";
+
 
 const createAppRouter = () =>
     createBrowserRouter([
         {
             path: "/auth",
-            element: <AuthRoot />,
+            element:
+                       <AuthRoot />,
+
             children: [
                 {
                     index: true,
@@ -26,7 +30,9 @@ const createAppRouter = () =>
         },
         {
             path: "/",
-            element: <AppRoot />,
+            element:
+                          <AppRoot />,
+
             children: [
                 {
                     index: true,
@@ -44,6 +50,7 @@ const createAppRouter = () =>
 
 export const AppRouter = () => {
     const router = useMemo(() => createAppRouter(), []);
+
 
     return <RouterProvider  router={router}/>
 }

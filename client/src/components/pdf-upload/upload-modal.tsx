@@ -11,12 +11,17 @@ import { Button } from "../ui/button";
 import { UploadedFile } from "@/types";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { cn } from "@/lib/utils";
+import { cn, isValidFileName } from "@/lib/utils";
 
 
 interface UploadModalProp {
   handleSubmit: (files: UploadedFile[]) => void;
 }
+
+
+// 21212_SwabTest_2025-12-20.pdf
+
+// 1234567891_LipidProfile_2024-07-02
 
 export default function UploadModal({ handleSubmit }: UploadModalProp) {
   const [files, setFiles] = useState<UploadedFile[]>([]);
@@ -28,6 +33,7 @@ export default function UploadModal({ handleSubmit }: UploadModalProp) {
       .map((file) => ({
         file,
         id: Math.random().toString(36).substring(2),
+        valid: isValidFileName(file.name)
       }));
 
     setFiles((prev) => [...prev, ...newFiles]);
@@ -90,6 +96,10 @@ export default function UploadModal({ handleSubmit }: UploadModalProp) {
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4" />
                         <span className="font-medium">{file.file.name}</span>
+                        {!file.valid && (
+                          <span className="text-sm text-red-500">Invalid file format</span>
+                        )}
+                         {/* <span className="text-sm text-red-500">(Invalid file format) </span> */}
                       </div>
                       <Button onClick={() => removeFile(file.id)} variant="destructive">
                         <X className="h-4 w-4"/>
@@ -103,7 +113,7 @@ export default function UploadModal({ handleSubmit }: UploadModalProp) {
           <Button
             className="w-full"
             onClick={handleContinue}
-            disabled={!files.length}
+            disabled={!files.length || files.some(file => file.valid === false)}
           >
             Continue
           </Button>
@@ -113,3 +123,4 @@ export default function UploadModal({ handleSubmit }: UploadModalProp) {
     </Dialog>
   );
 }
+

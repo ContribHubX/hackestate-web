@@ -10,14 +10,17 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
   useEffect(() => {
     if (isLoading) return;
 
-    if (data) {
-        dispatch(loginUser({ user: data }));
-    } 
+    if(localStorage.getItem("authToken") === null){
+
+    }
+
+    if (data)
+      dispatch(loginUser({...data}));
 
     if (error) {
         // alert(error);
-        console.log(error)
-    } 
+        console.log(error);
+    }
 
   }, [data, dispatch, error, isLoading])
 
