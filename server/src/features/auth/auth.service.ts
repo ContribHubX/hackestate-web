@@ -52,9 +52,14 @@ class AuthService {
   }
 
   async UpdateUser(user: UserInsert): Promise<User> {
+    // NOTE only update password
+    const { pid, dob, createdAt, ...fieldsUpdated } = user;
+
+    const hashedPassword = await bcrypt.hash(fieldsUpdated.password!, 10);
+
     const [updatedUser] = await this.db
       .update(schema.user)
-      .set({ ...user })
+      .set({ ...fieldsUpdated, password: hashedPassword})
       .where(eq(schema.user.pid, user.pid!))
       .returning();
 

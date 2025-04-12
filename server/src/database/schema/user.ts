@@ -7,6 +7,6 @@ export const user = pgTable("user", {
   dob: date("dob"),
   createdAt: timestamp("created_at").defaultNow(),
 });
-
+    
 export type User = typeof user.$inferSelect;
 export type UserInsert = typeof user.$inferInsert;

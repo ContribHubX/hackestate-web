@@ -13,7 +13,7 @@ const MainAppProvider = ({ children }: PropsWithChildren) => {
         <Provider store={store}>
             <ThemeProvider>
               {/* <AuthProvider>{children}</AuthProvider> */}
-              {children}
+              {children}  
             </ThemeProvider>
         </Provider>
     </QueryClientProvider>

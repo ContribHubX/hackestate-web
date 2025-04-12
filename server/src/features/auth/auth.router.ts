@@ -2,10 +2,12 @@ import { Router, Request, Response, NextFunction } from "express";
 import { Container } from "typedi";
 import AuthService from "./auth.service";
 import {
+  checkPidSchema,
   loginAdminSchema,
   loginSchema,
   registerAdminSchema,
   registerSchema,
+  updateUserPasswordSchema,
 } from "./auth.contracts";
 import { validateData } from "@/common/middleware/validate-request";
 import { verifyAuth } from "@/common/middleware/verify-auth";
@@ -86,6 +88,42 @@ authRouter.get(
     }
   }
 );
+
+authRouter.post(
+  "/auth/check-pid",
+  validateData(checkPidSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { pid } = req.body;
+
+    try {
+      const authService = Container.get(AuthService);
+      const result = await authService.CheckPid(pid);
+
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+authRouter.put(
+  "/auth/update-user",
+  validateData(updateUserPasswordSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.body;
+
+    try {
+      const authService = Container.get(AuthService);
+      const updatedUser = await authService.UpdateUser(user);
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+
 
 
 

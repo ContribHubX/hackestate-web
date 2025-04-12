@@ -7,6 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 
 export function isValidFileName(fileName: string): boolean {
-  const validFilenameRegex = /^\d+_[A-Za-z]+_\d{4}-\d{2}-\d{2}\.pdf$/;
+  const validFilenameRegex = /^\d+_[A-Za-z0-9]+_\d{4}-\d{2}-\d{2}\.pdf$/;
   return validFilenameRegex.test(fileName);
 }
+

@@ -37,7 +37,7 @@ testResultRouter.post(
 
 testResultRouter.get(
   "/test-result",
-//   verifyAuth,
+  verifyAuth,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const testResultService = Container.get(TestResultService);
@@ -52,18 +52,21 @@ testResultRouter.get(
 
 testResultRouter.get(
     "/test-result/:id",
-  //   verifyAuth,
+    verifyAuth,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const id = req.params.id;
+        console.log(`user id: ${id}`);
+
         if(!id){
-            res.status(400).json({ message: "Test result ID is required" });
-            return;
+          res.status(400).json({ message: "Test result ID is required" });
+          return;
         }
+
         const testResultService = Container.get(TestResultService);
         const result = await testResultService.GetTestResult(id);
-
-        res.status(200).json({ result });
+        console.log(`res: ${result}`);
+        res.status(200).json(result);
       } catch (error) {
         next(error);
       }

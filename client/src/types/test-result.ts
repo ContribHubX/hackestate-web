@@ -6,3 +6,4 @@ export type TestResult = Entity<{
   testDate: Date;
   size: number;
 }>
+  
