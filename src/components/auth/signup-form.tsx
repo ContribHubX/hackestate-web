@@ -98,6 +98,14 @@ const onSubmit = (value: RegisterSchema) => {
                         placeholder="m@gmail.com"
                     />
 
+                    <FormInput
+                      control={form.control}
+                      name="phone"
+                      label="Phone Number"
+                      type="tel"
+                      placeholder="+63"
+                    />
+
                     <FormInput 
                         control={form.control}
                         name="password"
@@ -106,6 +114,13 @@ const onSubmit = (value: RegisterSchema) => {
                         type="password"
                     />
 
+                    <FormInput 
+                        control={form.control}
+                        name="confirm"
+                        label="Confirm Password"
+                        placeholder=""
+                        type="password"
+                    />
 
                     <Button type="submit" className="w-full" disabled={isPending}>
                       {isPending && (

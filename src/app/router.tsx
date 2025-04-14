@@ -7,6 +7,8 @@ import Signup from "./pages/auth/signup";
 import AppRoot from "./pages/root";
 import Dashboard from "./pages/dashboard/page";
 import AiChat from "./pages/ai/ai-chat";
+import { Properties } from "./pages/properties/page";
+import { Events } from "./pages/events/page";
 // import AuthGuard from "@/components/auth/auth-guard";
 
 
@@ -46,6 +48,14 @@ const createAppRouter = () =>
                     path: "/chat",
                     index: true,
                     element: <AiChat />
+                },
+                {
+                    path:'/properties',
+                    element: <Properties />
+                },
+                {
+                    path: '/events',
+                    element: <Events />
                 }
             ]
         }

@@ -1,4 +1,3 @@
-import AppLayout from "@/components/layouts/app-layout";
 import { loginUser } from "@/redux/slice/auth";
 import { useGetCurrentUser } from "@/service/auth/get-current.user";
 import { useEffect } from "react";
@@ -19,15 +18,13 @@ const AppRoot = () => {
     }
 
     if (error) {
-      navigate("/auth/login");
+      // navigate("/auth/login");
     }
     
   }, [data, error, navigate]);
 
   return (
-    <AppLayout>
       <Outlet />
-    </AppLayout>
   )
 }
 

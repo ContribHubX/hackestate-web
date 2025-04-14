@@ -1,6 +1,9 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { nanoid } from "nanoid";
-import { ChatMessage } from "@shared/schema";
+import { ChatMessage } from "@/types/shared";
+
+
+// https://prod.liveshare.vsengsaas.visualstudio.com/join?1BE7545AF26C04146CA4A4319937F59E76A9
 
 // Sample chat messages for demonstration
 const sampleMessages: ChatMessage[] = [
@@ -68,10 +71,10 @@ export function useChat() {
       setMessages(prev => [...prev, assistantMessage]);
       
       // Prepare message history for API
-      const messageHistory = [
-        ...messages.map(msg => ({ role: msg.role, content: msg.content })),
-        { role: 'user', content }
-      ];
+      // const messageHistory = [
+      //   ...messages.map(msg => ({ role: msg.role, content: msg.content })),
+      //   { role: 'user', content }
+      // ];
       
       // For demo purposes, simulate a response instead of using the API
       // This avoids the need for the actual OpenAI integration during testing

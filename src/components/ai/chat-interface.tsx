@@ -4,14 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PropertyCard from "./property-card"
 import { Property } from "@/types/shared";
-import { useChat } from "@/hooks/use-chat";
+import { useChat } from "@/hooks/use-chats_test";
 import { usePropertyContext } from "@/providers/property";
+import Markdown from 'react-markdown'
+
+
+
+// import { usePropertyContext } from "@/providers/property";
 
 export default function ChatInterface() {
   const [message, setMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { messages, sendMessage, isLoading } = useChat();
-  const {allProperties : properties}= usePropertyContext();
+  const { getMessages : messages , sendMessage, isLoading } = useChat();
+  
+  // const {allProperties : properties}= usePropertyContext();
 
   // Scroll to bottom of messages
   useEffect(() => {
@@ -26,39 +32,41 @@ export default function ChatInterface() {
     }
   };
 
-  // Helper function to render property cards when present in a message
-  const renderMessageContent = (content: string) => {
-    // Check if the message contains property recommendations
-    const hasProperties = content.includes("recommendations") || 
-                          content.includes("recommend") ||
-                          content.includes("Here are");
-    
-    if (!hasProperties || !properties || properties.length === 0) {
-      return <p className="text-gray-800 leading-relaxed">{content}</p>;
+  const parseMarkdown = (content: string) => {
+    return content.replace(/\\n/g, "\n");
+  }
+
+  const extractJSONArray = (text: string): any[] | null => {
+    // const match = text.match(/\[.*\]/s); // 's' flag allows matching across lines
+    // if (!match) return null;
+  
+    try {
+      const parsed = JSON.parse(text);
+      return Array.isArray(parsed) ? parsed : null;
+    } catch {
+      return null;
     }
-    
-    // Select a subset of properties to show as recommendations
-    // In a real app, this would be based on the AI's actual recommendations
-    const recommendedProperties = properties.slice(0, 3);
-    
-    return (
-      <>
-        <p className="text-gray-800 leading-relaxed">{content}</p>
-        
-        {recommendedProperties.length > 0 && (
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            {recommendedProperties.map((property: Property) => (
-              <PropertyCard 
-                key={property.id}
-                property={property}
-                inChat={true}
-              />
-            ))}
-          </div>
-        )}
-      </>
-    );
   };
+  
+  const renderMessageContent = (content: string) => {
+    console.log("content: ", content);
+    const parsedArray = extractJSONArray(content);
+    console.log("parsed Array: ", parsedArray);
+    if (parsedArray) {
+      console.log("has parsed array")
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {parsedArray.map((property: Property) => (
+            <PropertyCard key={property.id} property={property} inChat={true} />
+          ))}
+        </div>
+      );
+    }  
+    // return <p className="text-gray-800 leading-relaxed" dangerouslySetInnerHTML={{ __html: content }} />;
+    return <Markdown>{parseMarkdown(content)}</Markdown>
+  };
+  
+  
 
   return (
     <>

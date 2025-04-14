@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -55,7 +55,22 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
-export type Property = typeof properties.$inferSelect;
+// export type Property = typeof properties.$inferSelect;
+export type Property = {
+  id: number;
+  category: string | null;
+  image: string;
+  location: string;
+  postedOn: string;
+  price: string;
+  status: string;
+  title: string;
+  type: string | null;
+  area_sqm: number | null;
+  amenities: string;
+  url: string | null;
+}
+
 export type InsertProperty = z.infer<typeof insertPropertySchema>;
 
 export type SavedProperty = typeof savedProperties.$inferSelect;
@@ -79,3 +94,4 @@ export type PropertyAnalysis = {
   cons: string[];
   recommendation: string;
 };
+

@@ -18,3 +18,11 @@ export function formatCurrency(amount: number): string {
     maximumFractionDigits: 0
   }).format(amount);
 }
+
+export const parseCommaDelimited = (input?: string): string[] => {
+  if (!input || typeof input !== "string") return [];
+  return input
+    .split(',')
+    .map(item => item.trim())
+    .filter(item => item.length > 0);
+};

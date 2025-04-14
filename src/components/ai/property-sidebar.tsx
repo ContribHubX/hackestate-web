@@ -1,28 +1,26 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+// import { useState } from "react";
+// import { useQuery } from "@tanstack/react-query";
 import {usePropertyContext} from "@/providers/property";
 import { Search, Filter, ClipboardList } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import PropertyCard from "./property-card";
+import { useState } from "react";
+import { parseCommaDelimited } from "@/lib/utils";
 
 
 export default function PropertySidebar() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState<"All" | "For Sale" | "For Rent">("All");
   
-  const { allProperties, savedProperties } = usePropertyContext();
+  const { savedProperties, isAdviser, toggleAdviser } = usePropertyContext();
   const isLoading = false;
-  // const { isLoading } = useQuery({
-  //   queryKey: ['/api/properties'],
-  //   onSuccess: (data) => {
-  //     fetchProperties(data);
-  //   }
-  // });
-  
+
   // Filter properties based on search term and filter
   const filteredProperties = savedProperties
     .filter(property => {
+    
+
       // Filter by status if not "All"
       if (filter !== "All" && property.status !== filter) {
         return false;
@@ -32,9 +30,9 @@ export default function PropertySidebar() {
       if (searchTerm) {
         const searchLower = searchTerm.toLowerCase();
         return (
-          property.name.toLowerCase().includes(searchLower) ||
-          property.address.toLowerCase().includes(searchLower) ||
-          property.amenities.some(amenity => 
+          property.title.toLowerCase().includes(searchLower) ||
+          property.location.toLowerCase().includes(searchLower) ||
+          parseCommaDelimited(property.amenities).some(amenity => 
             amenity.toLowerCase().includes(searchLower)
           )
         );
@@ -46,6 +44,11 @@ export default function PropertySidebar() {
   return (
     <aside className="w-full md:w-80 lg:w-96 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
       <div className="p-4 border-b border-gray-200">
+        <button
+          onClick={() => toggleAdviser()}
+        >
+          {isAdviser ? "Adviser"  : "Recommender"}  
+        </button>
         <div className="relative">
           <Input
             type="text"

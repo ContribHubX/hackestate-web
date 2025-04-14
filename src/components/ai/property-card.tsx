@@ -3,46 +3,36 @@ import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "../ui/badge";
 import { Property } from "@/types/shared";
-import { formatCurrency } from "@/lib/utils";
-
+import { usePropertyContext } from "@/providers/property";
+import { parseCommaDelimited } from "@/lib/utils";
 interface PropertyCardProps {
   property: Property;
   inChat?: boolean;
 }
 
 export default function PropertyCard({ property, inChat = false }: PropertyCardProps) {
-  // const {  } = usePropertyContext();
+  const { toggleSavedProperty, savedProperties } = usePropertyContext();
   
   // from context
-  const savedPropertyIds = ["1", "2", "3"];
+  const savedPropertyIds = savedProperties.map(p => p.id);
 
-  const isSaved = savedPropertyIds && savedPropertyIds.includes("1");
+  const isSaved = savedPropertyIds && savedPropertyIds.includes(property.id);
   
   const handleSaveToggle = () => {
-    if (isSaved) {
-      // removeSavedProperty(property.id);
-    } else {
-      // saveProperty(property.id);
-    }
+    toggleSavedProperty(property)
   };
   
-  const formatPrice = (price: number, status: string) => {
-    if (status === "For Rent") {
-      return `${formatCurrency(price)}/mo` ;
-    } else {
-      return formatCurrency(price);
-    }
-  };
   
-  // Limit amenities to display in the card
-  const displayAmenities = property.amenities.slice(0, 3);
+
+  
+  const displayAmenities = parseCommaDelimited(property.amenities);
 
   return (
     <div className={`property-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden ${inChat ? 'border border-gray-200' : ''}`}>
       <div className="relative">
         <img 
           src={property.image} 
-          alt={property.name} 
+          alt={property.title} 
           className="w-full h-40 object-cover" 
         />
         <div className={`absolute top-2 left-2 ${property.status === "For Rent" ? "bg-primary" : "bg-accent"} text-white text-xs font-medium px-2 py-1 rounded`}>
@@ -57,11 +47,12 @@ export default function PropertyCard({ property, inChat = false }: PropertyCardP
         </button>
       </div>
       <div className="p-4">
-        <h3 className="font-medium text-gray-900 mb-1">{property.name}</h3>
-        <p className="text-sm text-gray-500 mb-2">{property.address}</p>
+        <h3 className="font-medium text-gray-900 mb-1">{property.title}</h3>
+        <p className="text-sm text-gray-500 mb-2">{property.location}</p>
         <div className="flex justify-between items-center mb-3">
           <span className={`${property.status === "For Rent" ? "text-primary" : "text-accent"} font-semibold`}>
-            {formatPrice(property.price, property.status)}
+            {/* {formatPrice(property.price, property.status)} */}
+            {property.price}
           </span>
           <span className="text-sm text-gray-500">{property.area_sqm} sqm</span>
         </div>
@@ -71,17 +62,19 @@ export default function PropertyCard({ property, inChat = false }: PropertyCardP
               {amenity}
             </Badge>
           ))}
-          {property.amenities.length > 3 && (
+          {displayAmenities.length > 3 && (
             <Badge variant="outline" className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">
-              +{property.amenities.length - 3} more
+              + 2 more
             </Badge>
           )}
         </div>
         <Button 
           className="w-full bg-primary hover:bg-primary-dark text-white rounded-lg py-2 text-sm font-medium transition-colors"
+          onClick={() => window.open(property.url!, '_blank')}
         >
           View Details
         </Button>
+
       </div>
       
       <style>{`
