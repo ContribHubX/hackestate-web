@@ -9,6 +9,7 @@ import {
 
 import {
     Form,
+    FormField,
   } from "@/components/ui/form/form"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -20,7 +21,7 @@ import { FormInput } from "../ui/form/form.input"
 import { registerSchema, RegisterSchema, useRegister } from "@/service/auth/register"
 import { useToast } from "@/hooks/use-toast"
 import { Spinner } from "../ui/spinner"
-
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@radix-ui/react-select"
 
 export function SignupForm({
   className,
@@ -34,8 +35,9 @@ const form = useForm<RegisterSchema>({
   resolver: zodResolver(registerSchema),
   defaultValues: {
       email: "",
-      name: "",
-      password: ""
+      phone: "",
+      password: "",
+      role: ""
   }
 })
 
@@ -67,22 +69,34 @@ const onSubmit = (value: RegisterSchema) => {
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <div className="grid gap-6">
                   <div className="flex flex-col gap-4">
-                    
+                    <FormField
+                      control={form.control}
+                      name="role"
+                      render={({ field }) => (
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectItem value="agent">Agent</SelectItem>
+                              <SelectItem value="user">User</SelectItem>
+                              <SelectItem value="developer">developer</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+
                     <FormInput 
                         control={form.control}
                         name="email"
                         label="Email"
                         placeholder="m@gmail.com"
-                        
                     />
-
-                    <FormInput 
-                        control={form.control}
-                        name="name"
-                        label="Name"
-                        placeholder="JohnDoe"
-                        
-                    />          
 
                     <FormInput 
                         control={form.control}
@@ -91,6 +105,7 @@ const onSubmit = (value: RegisterSchema) => {
                         placeholder=""
                         type="password"
                     />
+
 
                     <Button type="submit" className="w-full" disabled={isPending}>
                       {isPending && (

@@ -1,6 +1,8 @@
 import { Entity } from ".";
 
+export type userRoles =  "user" | "developer" | "agent";
+
 export type User = Entity<{
     email: string;
-    role: "admin" | "super_admin";
+    role: userRoles
 }>

@@ -21,6 +21,7 @@ const AppRoot = () => {
     if (error) {
       navigate("/auth/login");
     }
+    
   }, [data, error, navigate]);
 
   return (

@@ -11,3 +11,10 @@ export function isValidFileName(fileName: string): boolean {
   return validFilenameRegex.test(fileName);
 }
 
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-PH', {
+    style: 'currency',  
+    currency: 'PHP',
+    maximumFractionDigits: 0
+  }).format(amount);
+}

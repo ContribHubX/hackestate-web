@@ -34,8 +34,8 @@ const navigate = useNavigate();
 const form = useForm<LoginSchema>({
   resolver: zodResolver(loginSchema),
   defaultValues: {
-      email: "admin@admin.com",
-      password: "Admin123#"
+      email: "",
+      password: ""
   }
 })
 
@@ -60,13 +60,13 @@ const onSubmit = (value: LoginSchema) => {
   })
 }
 
- return (
+return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl text-primary font-bold">Lab Manager 🏥</CardTitle>
+          <CardTitle className="text-2xl text-primary font-bold">Hackestate App</CardTitle>
           <CardDescription>
-            Login to your Administrator account
+            Glad to have you onboard!
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -74,12 +74,12 @@ const onSubmit = (value: LoginSchema) => {
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <div className="grid gap-6">
                   <div className="grid gap-6">
-
+                    
                    <FormInput
                         control={form.control}
                         name="email"
                         label="Email"
-                        placeholder="m@gmail.com"
+                        placeholder="Email"
 
                     />
 
@@ -87,10 +87,9 @@ const onSubmit = (value: LoginSchema) => {
                         control={form.control}
                         name="password"
                         label="Password"
-                        placeholder=""
+                        placeholder="Password"
                         type="password"
                     />
-
 
                     <Button type="submit" className="w-full bg-primary" disabled={isPending}>
                       {isPending && (

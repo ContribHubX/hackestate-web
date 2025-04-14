@@ -9,9 +9,15 @@ export const registerSchema = z.object({
     }).max(15, {
         message: "Username should not exceed 15 characters"
     }),
+    phone: z.string().min(11, { 
+        message: "Phone number must be 11 characters" 
+    }).max(11, { 
+        message: "Phone number must be 11 characters"
+    }),
     password: z.string().min(5, {
         message: "Password must have at least 5 characters"
-    })
+    }),
+    role: z.string().min(1)
 })
 
 export type RegisterSchema = z.infer<typeof registerSchema>;

@@ -6,6 +6,7 @@ import AuthRoot from "./pages/auth/root";
 import Signup from "./pages/auth/signup";
 import AppRoot from "./pages/root";
 import Dashboard from "./pages/dashboard/page";
+import AiChat from "./pages/ai/ai-chat";
 // import AuthGuard from "@/components/auth/auth-guard";
 
 
@@ -13,8 +14,7 @@ const createAppRouter = () =>
     createBrowserRouter([
         {
             path: "/auth",
-            element:
-                       <AuthRoot />,
+            element: <AuthRoot />,
 
             children: [
                 {
@@ -30,8 +30,7 @@ const createAppRouter = () =>
         },
         {
             path: "/",
-            element:
-                          <AppRoot />,
+            element: <AppRoot />,
 
             children: [
                 {
@@ -42,7 +41,12 @@ const createAppRouter = () =>
                   path: "/dashboard",
                   index: true,
                   element: <Dashboard />
-              }
+                },
+                {
+                    path: "/chat",
+                    index: true,
+                    element: <AiChat />
+                }
             ]
         }
     ])
