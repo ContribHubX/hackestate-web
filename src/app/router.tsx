@@ -9,6 +9,9 @@ import Dashboard from "./pages/dashboard/page";
 import AiChat from "./pages/ai/ai-chat";
 import { Properties } from "./pages/properties/page";
 import { Events } from "./pages/events/page";
+import { PropertyDetails } from "./pages/properties/details";
+import Agents from "./pages/agents/page";
+
 // import AuthGuard from "@/components/auth/auth-guard";
 
 
@@ -56,6 +59,14 @@ const createAppRouter = () =>
                 {
                     path: '/events',
                     element: <Events />
+                },
+                {
+                    path:'/properties/details',
+                    element: <PropertyDetails />
+                },
+                {
+                    path: '/agents',
+                    element: <Agents />
                 }
             ]
         }

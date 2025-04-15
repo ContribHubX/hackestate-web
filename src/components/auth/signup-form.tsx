@@ -1,147 +1,187 @@
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { EyeIcon, EyeOffIcon } from "lucide-react"
+import { useRegister } from "@/service/auth/register"
+import { useNavigate } from "react-router-dom"
+import { toast } from "@/hooks/use-toast"
 
-import {
-    Form,
-    FormField,
-  } from "@/components/ui/form/form"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { NavLink } from "react-router-dom"
-import { cn } from "@/lib/utils"
-
-
-import { FormInput } from "../ui/form/form.input"
-import { registerSchema, RegisterSchema, useRegister } from "@/service/auth/register"
-import { useToast } from "@/hooks/use-toast"
-import { Spinner } from "../ui/spinner"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@radix-ui/react-select"
-
-export function SignupForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
-
-const { mutate, isPending } = useRegister();
-const {toast} = useToast();
-
-const form = useForm<RegisterSchema>({
-  resolver: zodResolver(registerSchema),
-  defaultValues: {
-      email: "",
-      phone: "",
-      password: "",
-      role: ""
-  }
-})
-
-const onSubmit = (value: RegisterSchema) => {
-  mutate(value, {
-    onSuccess: () => {
-      toast({
-        description: "Register Successful",
-      })
-    },
-    onError: (error: unknown) => {
-      // alert(error.response.data.message);
-      console.log(error)
-    }
+export default function RegistrationForm() {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    role: "",
+    contactNumber: "",
+    name: "",
+    confirm: "",
   })
-}
+  const navigate = useNavigate();
 
- return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl">Let's Get you Started!</CardTitle>
-          <CardDescription>
-            Enter your personal Information
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <div className="grid gap-6">
-                  <div className="flex flex-col gap-4">
-                    <FormField
-                      control={form.control}
-                      name="role"
-                      render={({ field }) => (
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select Role" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectItem value="agent">Agent</SelectItem>
-                              <SelectItem value="user">User</SelectItem>
-                              <SelectItem value="developer">developer</SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      )}
-                    />
+  const { mutate } = useRegister();
 
-                    <FormInput 
-                        control={form.control}
-                        name="email"
-                        label="Email"
-                        placeholder="m@gmail.com"
-                    />
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-                    <FormInput
-                      control={form.control}
-                      name="phone"
-                      label="Phone Number"
-                      type="tel"
-                      placeholder="+63"
-                    />
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
 
-                    <FormInput 
-                        control={form.control}
-                        name="password"
-                        label="Password"
-                        placeholder=""
-                        type="password"
-                    />
+  const handleRoleChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      role: value,
+    }))
+  }
 
-                    <FormInput 
-                        control={form.control}
-                        name="confirm"
-                        label="Confirm Password"
-                        placeholder=""
-                        type="password"
-                    />
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // console.log("Form submitted:", formData)
+    console.log("email", formData.email)
+    console.log("password", formData.password)
+    console.log("role", formData.role)
+    console.log("contact", formData.contactNumber)
+    console.log("name", formData.name)
 
-                    <Button type="submit" className="w-full" disabled={isPending}>
-                      {isPending && (
-                        <Spinner size="medium" className="text-card" />
-                      )}  
-                      Sign up
-                    </Button>
-                    </div>
-                  <div className="text-center text-sm">
-                    Don&apos;t have an account?{" "}
-                    <NavLink className="underline underline-offset-4" to="/auth/login">Login</NavLink>
-                  </div>
-                </div>
-              </form>
-          </Form>
+    mutate(formData, {
+      onSuccess: () => {
+        console.log("Successfully registered");
+        navigate("/auth/login");
+      },
+      onError: (error) => {
+        toast({
+          title: "Register Error",
+          description: error.message
+        })
+        console.log(`err: `, JSON.stringify(error, null, 2));
+      }
+    })
+    // // Add your form submission logic here
+  }
+
+  return (
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle className="text-primary text-4xl">Register</CardTitle>
+        <CardDescription>Enter your details to register</CardDescription>
+      </CardHeader>
+      <form onSubmit={handleSubmit}>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              name="name"
+              type="text"
+              placeholder="Enter your name"
+              value={formData.name}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="Enter your email"
+              value={formData.email}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="contactNumber">Contact Number</Label>
+            <Input
+              id="contactNumber"
+              name="contactNumber"
+              type="tel"
+              placeholder="Enter your contact number"
+              value={formData.contactNumber}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <div className="relative">
+              <Input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Create a password"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-0 top-0 h-full px-3"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirm">Confirm Password</Label>
+            <div className="relative">
+              <Input
+                id="confirm"
+                name="confirm"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm your password"
+                value={formData.confirm}
+                onChange={handleInputChange}
+                required
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-0 top-0 h-full px-3"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                <span className="sr-only">{showConfirmPassword ? "Hide password" : "Show password"}</span>
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="role">Role</Label>
+            <Select value={formData.role} onValueChange={handleRoleChange} required>
+              <SelectTrigger id="role">
+                <SelectValue placeholder="Select your role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="user">User</SelectItem>
+                <SelectItem value="developer">Developer</SelectItem>
+                <SelectItem value="agent">Agent</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
-      </Card>
-      <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary  ">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
-      </div>
-    </div>
+
+        <CardFooter>
+          <Button type="submit" className="w-full">
+            Register
+          </Button>
+        </CardFooter>
+      </form>
+    </Card>
   )
 }

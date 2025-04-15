@@ -13,3 +13,13 @@ export type UploadedFile = {
   preview?: string
   valid: boolean
 }
+
+export type Persona = {
+  id: string;
+  createdAt: Date | null;
+  userId: string;
+ 
+  listingName: string;
+  personaDetails: string;
+  approved: boolean;
+}

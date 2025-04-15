@@ -1,29 +1,30 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { Property, Message } from "@/types/shared";
+import { Property, ChatMessage } from "@/types/shared";
 // import { apiRequest } from "@/lib/queryClient";
-import { hardcodedProperties } from "@/data/properties";
 
 type PropertyContextType = {
-  allProperties: Property[];
   filteredProperties: Property[];
   savedProperties: Property[];
   selectedProperty: Property | null;
-  messages: Message[];
+  messages: ChatMessage[];
   isLoading: boolean;
   isSavedPropertiesSidebarOpen: boolean;
   isDetailsOpen: boolean;
   filters: unknown;
   isAdviser: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setFilters: (filters: any) => void;
   toggleSavedProperty: (property: Property) => void;
   isPropertySaved: (propertyId: number) => boolean;
   selectProperty: (property: Property | null) => void;
   setFilteredProperties: (properties: Property[]) => void;
-  addMessage: (message: Message) => void;
+  addMessage: (message: ChatMessage) => void;
   toggleSidebar: () => void;
   toggleDetails: () => void;
-  compareProperties: () => void;
   toggleAdviser: () => void;
+  logOut: () => void;
+
+  addAdvisorMessage: (assistantMessageId: string, responseContent: string) => void
 
   // fetchProperties: () => void;
   // toggleShowComparison: () => void;
@@ -32,11 +33,10 @@ type PropertyContextType = {
 const PropertyContext = createContext<PropertyContextType | undefined>(undefined);
 
 export const PropertyProvider = ({ children }: { children: ReactNode }) => {
-  const [allProperties, setAllProperties] = useState<Property[]>([]);
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [savedProperties, setSavedProperties] = useState<Property[]>([]);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSavedPropertiesSidebarOpen, setIsSavedPropertiesSidebarOpen] = useState(true);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -61,11 +61,21 @@ export const PropertyProvider = ({ children }: { children: ReactNode }) => {
         if (localSaved) {
           const parsed = JSON.parse(localSaved) as Property[];
           setSavedProperties(parsed);
-        } else {
-          const fallback = hardcodedProperties.slice(1, 4);
-          setSavedProperties(fallback);
-          localStorage.setItem("savedProperties", JSON.stringify(fallback));
         }
+
+        // messages local
+        const localMessagesSaved = localStorage.getItem("messages");
+        if (localMessagesSaved) {
+          const parsed = JSON.parse(localMessagesSaved) as ChatMessage[];
+          setMessages(parsed);
+        }
+
+         // selected local
+         const localSelectedProperty = localStorage.getItem("selectedProperty");
+         if (localSelectedProperty) {
+           const parsed = JSON.parse(localSelectedProperty) as Property;
+           setSelectedProperty(parsed);
+         }
 
       } catch (error) {
         console.error("Error loading properties:", error);
@@ -78,8 +88,28 @@ export const PropertyProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
+    const localSaved = localStorage.getItem("savedProperties");
+    if (localSaved && savedProperties.length === 0) 
+      return;
+      
     localStorage.setItem("savedProperties", JSON.stringify(savedProperties));
   }, [savedProperties]);
+
+  useEffect(() => {
+    const localMessagesSaved = localStorage.getItem("messages");
+    if (localMessagesSaved && messages.length === 0) 
+      return;
+      
+    localStorage.setItem("messages", JSON.stringify(messages));
+  }, [messages]);
+
+  useEffect(() => {
+    const localSelectedProperty = localStorage.getItem("selectedProperty");
+    if (localSelectedProperty && !selectedProperty) 
+      return;
+      
+    localStorage.setItem("selectedProperty", JSON.stringify(selectedProperty));
+  }, [selectedProperty]);
 
   const toggleSavedProperty = (property: Property) => {
     const isAlreadySaved = savedProperties.some(p => p.id === property.id);
@@ -97,12 +127,12 @@ export const PropertyProvider = ({ children }: { children: ReactNode }) => {
 
   const selectProperty = (property: Property | null) => {
     setSelectedProperty(property);
-    if (property) {
-      setIsDetailsOpen(true);
-    }
+    // if (property) {
+    //   setIsDetailsOpen(true);
+    // }
   };
 
-  const addMessage = (message: Message) => {
+  const addMessage = (message: ChatMessage) => {
     setMessages(prevMessages => [...prevMessages, message]);
   };
 
@@ -114,28 +144,28 @@ export const PropertyProvider = ({ children }: { children: ReactNode }) => {
     setIsDetailsOpen(prev => !prev);
   };
 
-  const compareProperties = () => {
-    if (savedProperties.length < 2) {
-      console.warn("Need at least 2 properties to compare");
-      return;
-    }
+  const addAdvisorMessage = (assistantMessageId: string, responseContent: string) => {
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === assistantMessageId ? { ...msg, content: responseContent } : msg
+      )
+    );
+  }
 
-    // Create a comparison message
-    const comparisonRequest: Message = {
-      id: 1,
-      userId: 12,
-      role: "user",
-      content: `Can you compare these saved properties and help me decide which one is best? ${savedProperties.map(p => p.title).join(", ")}`,
-      timestamp: new Date().toISOString(),
-    };
+  const logOut = () => {
+    localStorage.removeItem("savedProperties");
+    setSavedProperties([]);
+    localStorage.removeItem("messages");
+    setMessages([]);
+    localStorage.removeItem("user");
+    localStorage.removeItem("selectedProperty");
+    setSelectedProperty(null);
+  } 
 
-    addMessage(comparisonRequest);
-  };
 
   return (
     <PropertyContext.Provider
       value={{
-        allProperties,
         filteredProperties,
         savedProperties,
         selectedProperty,
@@ -153,8 +183,9 @@ export const PropertyProvider = ({ children }: { children: ReactNode }) => {
         addMessage,
         toggleSidebar,
         toggleDetails,
-        compareProperties,
-        toggleAdviser
+        toggleAdviser,
+        addAdvisorMessage,
+        logOut
       }}
     >
       {children}

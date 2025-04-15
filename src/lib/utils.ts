@@ -1,3 +1,4 @@
+import { User } from "@/types/user";
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -25,4 +26,19 @@ export const parseCommaDelimited = (input?: string): string[] => {
     .split(',')
     .map(item => item.trim())
     .filter(item => item.length > 0);
+};
+
+export const getUser = (): User | null => {
+  const userString = localStorage.getItem("user");
+  if (!userString) {
+    return null;
+  }
+
+  try {
+    const user = JSON.parse(userString) as User;
+    return user;
+  } catch (error) {
+    console.error("Failed to parse user from localStorage", error);
+    return null;
+  }
 };

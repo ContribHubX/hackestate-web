@@ -45,9 +45,14 @@ const onSubmit = (value: LoginSchema) => {
       toast({
         description: "Login Successful",
       })
-      dispatch(loginUser({ admin: data.admin, token: data.token }));
-      console.log(`api response: ${data}`);
-      navigate("/dashboard");
+      dispatch(loginUser({ user: data.user, token: data.token }));
+      console.log(`api response: ${JSON.stringify(data.user, null, 2)}`);
+
+      if (data.user.role === "agent") {
+        navigate("/agents");
+      } else {
+        navigate("/")
+      }
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
@@ -63,8 +68,8 @@ const onSubmit = (value: LoginSchema) => {
 return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl text-primary font-bold">Hackestate App</CardTitle>
+        <CardHeader className="">
+          <CardTitle className="text-4xl text-primary font-bold">Login</CardTitle>
           <CardDescription>
             Glad to have you onboard!
           </CardDescription>

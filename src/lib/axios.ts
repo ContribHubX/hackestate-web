@@ -3,8 +3,13 @@ import Axios from "axios";
 export const api = Axios.create({
     //  baseURL: "http://localhost:3000",
     // baseURL: "https://xdkbcbc8-5000.asse.devtunnels.ms",
-    baseURL: "http://127.0.0.1:5000",
+    baseURL: "https://1cz2hd3b-5000.asse.devtunnels.ms",
     withCredentials: true
+})
+
+export const apiExpress = Axios.create({
+  baseURL: "https://1cz2hd3b-3000.asse.devtunnels.ms",
+  withCredentials: true
 })
 
 // Request interceptor

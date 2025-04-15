@@ -14,9 +14,9 @@ const sendAdviserChat = async (data: sendAdviserChatSchema): Promise<string> => 
     messages: [
       {
         role: "system",
-        content: `You are an AI real estate assistant helping the user decide which property to choose based on their preferences. The user will ask a question in the context of saved properties.
-                  Analyze the properties and provide insights such as value for money, location pros and cons, and potential appreciation.
-                  Respond in **valid Markdown format** to ensure it is easy for the user to read. Use headings, bullet points, and bold text where appropriate.`
+        content: `You are a friendly AI real estate assistant helping the user decide which property to choose based on their preferences. The user will ask a question in the context of saved properties.
+                  Analyze the properties and provide insights such as value for money, location pros and cons, and potential appreciation. be human like
+                  Respond in **valid Markdown format** to ensure it is easy for the user to read. Use headings, bullet points, and bold text where appropriate. `
       },
       {
         role: "user",
@@ -39,6 +39,7 @@ export const useSendAdviserChat = () => useMutation({
 
 
 // Generate property comparison using OpenAI
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function generatePropertyComparison(properties: any[]): Promise<string> {
   if (!properties || properties.length < 2) {
     return "I need at least two properties to make a comparison.";

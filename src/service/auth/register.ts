@@ -1,4 +1,4 @@
-import { api } from "@/lib/axios";
+import { apiExpress } from "@/lib/axios";
 import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 
@@ -9,7 +9,7 @@ export const registerSchema = z.object({
     }).max(15, {
         message: "Username should not exceed 15 characters"
     }),
-    phone: z.string().min(11, { 
+    contactNumber: z.string().min(11, { 
         message: "Phone number must be 11 characters" 
     }).max(11, { 
         message: "Phone number must be 11 characters"
@@ -23,7 +23,7 @@ export const registerSchema = z.object({
 export type RegisterSchema = z.infer<typeof registerSchema>;
 
 const register = async (data: RegisterSchema) => {
-    const response = await api.post("/api/auth/register", data);
+    const response = await apiExpress.post("/api/auth/register", data);
     return response.data;
 }
 
